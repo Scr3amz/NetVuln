@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package netvuln.v1;
 
+option go_package = "github.com/Scr3amz/NetVuln/protos/gen;NetVuln";
+
 service NetVulnService {
     rpc CheckVuln(CheckVulnRequest) returns (CheckVulnResponse);
 }
