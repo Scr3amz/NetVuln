@@ -4,7 +4,7 @@
 // - protoc             v3.12.4
 // source: protos/proto/vulners.proto
 
-package NetVuln
+package vulnv1
 
 import (
 	context "context"
