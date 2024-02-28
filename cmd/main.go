@@ -1,6 +1,9 @@
 package main
 
-import "github.com/Scr3amz/NetVuln/internal/logger"
+import (
+	grpcapp "github.com/Scr3amz/NetVuln/internal/app/grpc"
+	"github.com/Scr3amz/NetVuln/internal/logger"
+)
 
 func main() {
 	log := logger.NewLogger("local")
@@ -10,5 +13,8 @@ func main() {
 	//TODO: add config
 
 	//TODO: add start of app
+	application := grpcapp.NewApp(log, 123)
+
+	application.MustRun()
 
 }
