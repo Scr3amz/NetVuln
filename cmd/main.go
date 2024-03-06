@@ -1,20 +1,34 @@
 package main
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
+
 	grpcapp "github.com/Scr3amz/NetVuln/internal/app/grpc"
+	"github.com/Scr3amz/NetVuln/internal/config"
 	"github.com/Scr3amz/NetVuln/internal/logger"
 )
 
 func main() {
-	log := logger.NewLogger("local")
+	config := config.MustLoad()
+
+	log := logger.NewLogger(config.Env)
 
 	log.Info("starting application" )
 
-	//TODO: add config
+	application := grpcapp.NewApp(log, config.GRPC.Port)
 
-	//TODO: add start of app
-	application := grpcapp.NewApp(log, 123)
+	go func() {
+		application.MustRun()
+	}()
 
-	application.MustRun()
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+
+	<-stop
+
+	application.Stop()
+	log.Info("Application stopped")
 
 }
