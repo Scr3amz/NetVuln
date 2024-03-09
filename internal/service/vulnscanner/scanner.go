@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"math"
 	"strconv"
 	"strings"
 
@@ -83,11 +84,13 @@ func (s VulnScanner) GetVuln(ctx context.Context, targets []string, tcpPorts []i
 		services := make([]models.Service, 0)
 
 		for _, port := range host.Ports {
+			
 			service := models.Service{
 				Name:    port.Service.Name,
 				Version: port.Service.Product + " " + port.Service.Version,
 				TcpPort: int32(port.ID),
 				//TODO: добавить уязвимости
+				Vulns:  vulnsForPort(port),
 			}
 			services = append(services, service)
 		}
@@ -95,6 +98,7 @@ func (s VulnScanner) GetVuln(ctx context.Context, targets []string, tcpPorts []i
 		targetResaults = append(targetResaults, targetResault)
 	}
 
+	//TODO: добавить информацию из тестов
 	log.Info("scanning complete ")
 
 	return targetResaults, nil
@@ -109,4 +113,41 @@ func intSliceToString(arr []int32) string {
 
 	result := strings.Join(strArr, ",")
 	return result
+}
+
+func vulnsForPort(port nmap.Port) []models.Vuln {
+	vulns := make([]models.Vuln, 0)
+	if len(port.Scripts) < 1 {
+		//TODO: log
+		return vulns
+	}
+	
+	for _, script := range port.Scripts {
+		for _, table := range script.Tables {
+			for _, subTable := range table.Tables {
+				var cvss, id string
+				for _, el := range subTable.Elements {
+					if el.Key == "id" {
+						id = el.Value
+					}
+					if el.Key == "cvss" {
+						cvss = el.Value
+					}
+				}
+				vuln := models.Vuln{
+					Identifier: id,
+					CvssScore: MustConverseToFloat32(cvss),
+				}
+				vulns = append(vulns, vuln)
+				
+			}
+		}
+	}
+	return vulns
+}
+
+func MustConverseToFloat32(cvss string) float32 {
+	res, _ := strconv.ParseFloat(cvss, 32)
+	res = math.Round(res*10) / 10
+	return float32(res)
 }
