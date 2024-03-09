@@ -44,7 +44,13 @@ func (s *serverAPI) CheckVuln(ctx context.Context, r *vulnv1.CheckVulnRequest) (
 				Version: service.Version,
 				TcpPort: service.TcpPort,
 			}
-			//TODO: добавить vulns
+			for _, vuln := range service.Vulns {
+				vuln := vulnv1.Vulnerability{
+					Identifier: vuln.Identifier,
+					CvssScore: vuln.CvssScore,
+				}
+				grpcService.Vulns = append(grpcService.Vulns, &vuln)
+			}
 			grpcTarget.Services = append(grpcTarget.Services, &grpcService)
 		}
 		response.Results = append(response.Results, &grpcTarget)
