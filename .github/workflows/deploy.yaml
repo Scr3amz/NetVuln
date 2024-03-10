@@ -22,4 +22,6 @@ jobs:
       run: go run ./cmd/main.go &
 
     - name: Run tests
-      run: go test ./tests/...
+      run: |
+        sleep 10 
+        go test ./tests/...
