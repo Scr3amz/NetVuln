@@ -20,6 +20,11 @@ type serverAPI struct {
 
 var _ vulnv1.NetVulnServiceServer = (*serverAPI)(nil)
 
+const (
+	minPort = 0
+	maxPort = 65535
+)
+
 func Register(gRPC *grpc.Server, scanner models.VulnScanner) {
 	vulnv1.RegisterNetVulnServiceServer(gRPC, &serverAPI{scanner: scanner})
 }
@@ -79,7 +84,7 @@ func validateVulnRequest(req *vulnv1.CheckVulnRequest) error {
 	}
 
 	for _, port := range req.TcpPort {
-		if port > 65535 || port < 0 {
+		if port > maxPort || port < minPort {
 			return status.Error(codes.InvalidArgument, "invalid port value")
 		}
 	}
