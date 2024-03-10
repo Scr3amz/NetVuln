@@ -22,6 +22,10 @@ type App struct {
 	port       int
 }
 
+const (
+	grpcHost = "127.0.0.1"
+)
+
 // NewApp creates new gRPC server app.
 func NewApp(log *slog.Logger, port int) *App {
 	loggingOpts := []logging.Option{
@@ -76,7 +80,7 @@ func (a *App) Run() error {
 		slog.Int("port", a.port),
 	)
 
-	listner, err := net.Listen("tcp", fmt.Sprintf(":%d", a.port))
+	listner, err := net.Listen("tcp", fmt.Sprintf("%s:%d", grpcHost, a.port))
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
@@ -98,3 +102,4 @@ func (a *App) Stop() {
 
 	a.gRPCServer.GracefulStop()
 }
+
