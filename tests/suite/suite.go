@@ -20,7 +20,7 @@ type Suite struct {
 }
 
 const (
-	grpcHost = "127.0.0.1"
+	grpcHost = ""
 	keyEnv = "CONFIG_PATH"
 )
 

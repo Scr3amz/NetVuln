@@ -23,7 +23,7 @@ type App struct {
 }
 
 const (
-	grpcHost = "127.0.0.1"
+	grpcHost = ""
 )
 
 // NewApp creates new gRPC server app.
