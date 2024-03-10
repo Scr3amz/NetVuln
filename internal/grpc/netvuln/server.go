@@ -2,11 +2,15 @@ package netvuln
 
 import (
 	"context"
-	"time"
+	"net"
+	"regexp"
+
 
 	"github.com/Scr3amz/NetVuln/internal/models"
 	vulnv1 "github.com/Scr3amz/NetVuln/protos/gen"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type serverAPI struct {
@@ -25,11 +29,6 @@ func (s *serverAPI) CheckVuln(ctx context.Context, r *vulnv1.CheckVulnRequest) (
 	if err != nil {
 		return nil, err
 	}
-
-	// TODO: протестировать получение ответа (логика приложения)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
 
 	nmapData, err := s.scanner.GetVuln(ctx, r.Targets, r.TcpPort)
 
@@ -60,7 +59,42 @@ func (s *serverAPI) CheckVuln(ctx context.Context, r *vulnv1.CheckVulnRequest) (
 	return &response, nil
 }
 
+// validateVulnRequest checks the validity of the input data
 func validateVulnRequest(req *vulnv1.CheckVulnRequest) error {
-	// TODO: написать логику валидации входных данных
+	if len(req.Targets) == 0 {
+		return status.Error(codes.InvalidArgument, "target IPs is required")
+	}
+
+	if len(req.TcpPort) == 0 {
+		return status.Error(codes.InvalidArgument, "tcp ports is required")
+	}
+
+	for _, target := range req.Targets {
+		if target == "" {
+			return status.Error(codes.InvalidArgument, "target address must not be empty")
+		}
+		if (isValidIP(target) || isValidDomain(target)) == false {
+			return status.Error(codes.InvalidArgument, "the target must be an ip address or domain")
+		}
+	}
+
+	for _, port := range req.TcpPort {
+		if port > 65535 || port < 0 {
+			return status.Error(codes.InvalidArgument, "invalid port value")
+		}
+	}
+
 	return nil
+}
+
+// isValidIP checks the validity of the ip address.
+func isValidIP(ip string) bool {
+	addr := net.ParseIP(ip)
+	return addr != nil
+}
+
+// isValidDomain checks the validity of the domain.
+func isValidDomain(domain string) bool {
+	domainRegex := regexp.MustCompile(`^[a-zA-Z0-9.-]+$`)
+	return domainRegex.MatchString(domain)
 }
