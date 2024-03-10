@@ -18,5 +18,8 @@ jobs:
     - name: Get dependencies
       run: go mod download
 
+    - name: Start gRPC server
+      run: go run ./cmd/main.go &
+
     - name: Run tests
       run: go test ./tests/...
