@@ -21,6 +21,8 @@ jobs:
     - name: Start gRPC server
       run: go run ./cmd/main.go --config=./config/local.yaml &
 
+    - name: Wait for server
+      run: sleep 10  
 
   test:
     needs: run
