@@ -2,4 +2,4 @@ env : "local" # "dev", "prod"
 scriptPath : "./vulners.nse"
 grpc:
   port: 50051
-  timeout: 5s
+  timeout: 1h
