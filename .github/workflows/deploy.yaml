@@ -3,7 +3,7 @@ name: Testing
 on: [push, pull_request]
 
 jobs:
-  test:
+  run:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +21,22 @@ jobs:
     - name: Start gRPC server
       run: go run ./cmd/main.go &
 
+
+  test:
+    needs: run
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.21
+
+    - name: Get dependencies
+      run: go mod download
+
     - name: Run tests
-      run: |
-        sleep 10 
-        go test ./tests/...
+      run: go test ./tests/...
