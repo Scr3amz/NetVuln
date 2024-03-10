@@ -13,13 +13,15 @@ import (
 
 const (
 	maxPort = 65535
+	numberOfAddresses = 5
+	numberOfPorts = 5
 )
 
 func TestCheckVuln_HappyPath(t *testing.T) {
 	ctx, st := suite.NewSuite(t)
 
-	targetAdresses := randomFakeIPAddress(5)
-	tcpPorts := randomPorts(5)
+	targetAdresses := randomFakeIPAddress(numberOfAddresses)
+	tcpPorts := randomPorts(numberOfPorts)
 
 	res, err := st.VulnClient.CheckVuln(ctx, &vulnv1.CheckVulnRequest{
 		Targets: targetAdresses,
@@ -41,31 +43,31 @@ func TestCheckVuln_FailCases(t *testing.T) {
 		{
 			name:        "CheckVuln with empty targets slice",
 			targets:     []string{},
-			tcpPorts:    randomPorts(3),
+			tcpPorts:    randomPorts(numberOfPorts),
 			expectedErr: "target IPs is required",
 		},
 		{
 			name:        "CheckVuln with empty ports slice",
-			targets:     randomFakeIPAddress(3),
+			targets:     randomFakeIPAddress(numberOfAddresses),
 			tcpPorts:    []int32{},
 			expectedErr: "tcp ports is required",
 		},
 		{
 			name:        "CheckVuln with empty 1 or more empty target",
 			targets:     []string{"google.com", "youtube.com", ""},
-			tcpPorts:    randomPorts(3),
+			tcpPorts:    randomPorts(numberOfPorts),
 			expectedErr: "target address must not be empty",
 		},
 		{
 			name:        "CheckVuln with port out of bounds",
-			targets:     randomFakeIPAddress(3),
+			targets:     randomFakeIPAddress(numberOfAddresses),
 			tcpPorts:    []int32{22, 80, -9},
 			expectedErr: "invalid port value",
 		},
 		{
 			name:        "CheckVuln with invalid targets",
 			targets:     []string{"google.com", "youtube.com", "worivowrivjodfvw'dcwewec,,wef.wef.d"},
-			tcpPorts:    randomPorts(3),
+			tcpPorts:    randomPorts(numberOfPorts),
 			expectedErr: "the target must be an ip address or domain",
 		},
 	}
