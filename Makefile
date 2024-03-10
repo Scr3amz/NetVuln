@@ -1,4 +1,6 @@
-PHONY: generate-structs run build
+PHONY: generate-structs run build test
+
+# Generate code from ".proto"-file
 generate-structs:
 	mkdir -p protos/gen
 	protoc -I protos/proto protos/proto/vulners.proto \
@@ -7,5 +9,9 @@ generate-structs:
 
 run:
 	go run ./cmd/main.go --config=./config/local.yaml
+
 build:
 	go build ./cmd/main.go --config=./config/local.yaml
+
+test:
+	go test -v ./tests/...
