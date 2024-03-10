@@ -22,6 +22,8 @@ func NewVulnScanner(log *slog.Logger) *VulnScanner {
 	}
 }
 
+// GetVuln scans target addresses and tcp port, getting
+// information about vulnerabilities on each port.
 func (s VulnScanner) GetVuln(ctx context.Context, targets []string, tcpPorts []int32) ([]models.TargetResult, error) {
 	const op = "vulnscanner.GetVuln"
 
@@ -29,7 +31,7 @@ func (s VulnScanner) GetVuln(ctx context.Context, targets []string, tcpPorts []i
 
 	log := s.log.With(
 		slog.String("op", op),
-		slog.String("tcpPorts", tcpPortString ),
+		slog.String("tcpPorts", tcpPortString),
 		slog.String("IPs", strings.Join(targets, ", ")),
 	)
 
@@ -84,13 +86,12 @@ func (s VulnScanner) GetVuln(ctx context.Context, targets []string, tcpPorts []i
 		services := make([]models.Service, 0)
 
 		for _, port := range host.Ports {
-			
+
 			service := models.Service{
 				Name:    port.Service.Name,
 				Version: port.Service.Product + " " + port.Service.Version,
 				TcpPort: int32(port.ID),
-				//TODO: добавить уязвимости
-				Vulns:  vulnsForPort(port),
+				Vulns:   vulnsForPort(port),
 			}
 			services = append(services, service)
 		}
@@ -98,12 +99,12 @@ func (s VulnScanner) GetVuln(ctx context.Context, targets []string, tcpPorts []i
 		targetResaults = append(targetResaults, targetResault)
 	}
 
-	//TODO: добавить информацию из тестов
 	log.Info("scanning complete ")
 
 	return targetResaults, nil
 }
 
+// intSliceToString convert a slice of int32 to string.
 func intSliceToString(arr []int32) string {
 	strArr := make([]string, len(arr))
 
@@ -115,13 +116,14 @@ func intSliceToString(arr []int32) string {
 	return result
 }
 
+// vulnsForPort returns slice of vulnerabilities found on tcp port.
+// If the port has no vulnerabilities, returns an empty slice.
 func vulnsForPort(port nmap.Port) []models.Vuln {
 	vulns := make([]models.Vuln, 0)
 	if len(port.Scripts) < 1 {
-		//TODO: log
 		return vulns
 	}
-	
+
 	for _, script := range port.Scripts {
 		for _, table := range script.Tables {
 			for _, subTable := range table.Tables {
@@ -134,20 +136,29 @@ func vulnsForPort(port nmap.Port) []models.Vuln {
 						cvss = el.Value
 					}
 				}
+				floatCVSS := MustConverseToFloat32(cvss)
+				if floatCVSS == 0 {
+					break
+				}
 				vuln := models.Vuln{
 					Identifier: id,
-					CvssScore: MustConverseToFloat32(cvss),
+					CvssScore:  floatCVSS,
 				}
 				vulns = append(vulns, vuln)
-				
+
 			}
 		}
 	}
 	return vulns
 }
 
+// MustConverseToFloat32 converts a string with cvss-code into float32.
+// Returns 0 if the conversion failed
 func MustConverseToFloat32(cvss string) float32 {
-	res, _ := strconv.ParseFloat(cvss, 32)
+	res, err := strconv.ParseFloat(cvss, 32)
+	if err != nil {
+		return 0
+	}
 	res = math.Round(res*10) / 10
 	return float32(res)
 }
