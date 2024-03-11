@@ -7,6 +7,7 @@ import (
 	vulnv1 "github.com/Scr3amz/NetVuln/protos/gen"
 	"github.com/Scr3amz/NetVuln/tests/suite"
 	"github.com/brianvoe/gofakeit"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,15 +20,23 @@ const (
 func TestCheckVuln_HappyPath(t *testing.T) {
 	ctx, st := suite.NewSuite(t)
 
-	targetAdresses := randomFakeIPAddress(numberOfAddresses)
-	tcpPorts := randomPorts(numberOfPorts)
+	targetAdresses := []string{"google.com", "youtube.com"}
+	tcpPorts := []int32{22, 80, 443}
 
-	_, err := st.VulnClient.CheckVuln(ctx, &vulnv1.CheckVulnRequest{
+	res, err := st.VulnClient.CheckVuln(ctx, &vulnv1.CheckVulnRequest{
 		Targets: targetAdresses,
 		TcpPort: tcpPorts,
 	})
 
 	require.NoError(t, err)
+
+	for _, res := range res.Results {
+		assert.NotEmpty(t, res.Target)
+		for _, service := range res.Services {
+			assert.NotEmpty(t, service.Name)
+			assert.NotEmpty(t, service.TcpPort)
+		}
+	}
 }
 
 func TestCheckVuln_FailCases(t *testing.T) {
