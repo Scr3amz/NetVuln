@@ -5,7 +5,6 @@ import (
 	"net"
 	"regexp"
 
-
 	"github.com/Scr3amz/NetVuln/internal/models"
 	vulnv1 "github.com/Scr3amz/NetVuln/protos/gen"
 	"google.golang.org/grpc"
@@ -44,21 +43,20 @@ func (s *serverAPI) CheckVuln(ctx context.Context, r *vulnv1.CheckVulnRequest) (
 		grpcTarget.Target = targetResult.Target
 		for _, service := range targetResult.Services {
 			grpcService := vulnv1.Service{
-				Name: service.Name,
+				Name:    service.Name,
 				Version: service.Version,
 				TcpPort: service.TcpPort,
 			}
 			for _, vuln := range service.Vulns {
 				vuln := vulnv1.Vulnerability{
 					Identifier: vuln.Identifier,
-					CvssScore: vuln.CvssScore,
+					CvssScore:  vuln.CvssScore,
 				}
 				grpcService.Vulns = append(grpcService.Vulns, &vuln)
 			}
 			grpcTarget.Services = append(grpcTarget.Services, &grpcService)
 		}
 		response.Results = append(response.Results, &grpcTarget)
-
 	}
 
 	return &response, nil

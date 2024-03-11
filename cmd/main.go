@@ -15,7 +15,7 @@ func main() {
 
 	log := logger.NewLogger(config.Env)
 
-	log.Info("starting application" )
+	log.Info("starting application")
 
 	application := grpcapp.NewApp(log, config.GRPC.Port)
 

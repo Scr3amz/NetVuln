@@ -7,8 +7,8 @@ import (
 
 const (
 	envLocal = "local"
-	envDev = "dev"
-	envProd = "prod"
+	envDev   = "dev"
+	envProd  = "prod"
 )
 
 func NewLogger(env string) *slog.Logger {

@@ -28,6 +28,7 @@ func MustLoad() *Config {
 	return MustLoadPath(path)
 }
 
+// MustLoadPath returns conthig by path
 func MustLoadPath(configPath string) *Config {
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		panic("config file does not exist: " + configPath)
@@ -48,7 +49,6 @@ func MustLoadPath(configPath string) *Config {
 func fetchConfigPath() string {
 	var path string
 
-	// --config="./config.yaml"
 	flag.StringVar(&path, "config", "", "config path")
 	flag.Parse()
 

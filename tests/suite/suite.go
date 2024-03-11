@@ -21,7 +21,7 @@ type Suite struct {
 
 const (
 	grpcHost = ""
-	keyEnv = "CONFIG_PATH"
+	keyEnv   = "CONFIG_PATH"
 )
 
 // NewSuite creates new test suite.
@@ -55,6 +55,7 @@ func NewSuite(t *testing.T) (context.Context, *Suite) {
 	}
 }
 
+// configPath try to get config path from env variable
 func configPath() string {
 
 	if v := os.Getenv(keyEnv); v != "" {
@@ -64,6 +65,7 @@ func configPath() string {
 	return "../config/local_tests.yaml"
 }
 
+// grpcAddress combines host and port
 func grpcAddress(config *config.Config) string {
 	return net.JoinHostPort(grpcHost, strconv.Itoa(config.GRPC.Port))
 }

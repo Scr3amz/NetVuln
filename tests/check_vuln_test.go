@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	maxPort = 65535
+	maxPort           = 65535
 	numberOfAddresses = 5
-	numberOfPorts = 5
+	numberOfPorts     = 5
 )
 
 func TestCheckVuln_HappyPath(t *testing.T) {
